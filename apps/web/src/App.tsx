@@ -3,7 +3,7 @@ function App() {
     <>
       <div>Web 30</div>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
