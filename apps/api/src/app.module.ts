@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisModule } from './redis/redis.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -34,7 +35,7 @@ import { RedisModule } from './redis/redis.module';
     // 3. Redis 연결 설정
     RedisModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [],
 })
 export class AppModule {}
