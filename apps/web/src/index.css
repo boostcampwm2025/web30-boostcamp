@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand: #6d28d9;
+  --color-brand-foreground: #f5f3ff;
+  --color-surface: #f8fafc;
+  --color-ink: #0f172a;
+  --font-sans: "Inter", "Pretendard Variable", system-ui, -apple-system, sans-serif;
+}
+
+:root {
+  font-family: var(--font-sans);
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}

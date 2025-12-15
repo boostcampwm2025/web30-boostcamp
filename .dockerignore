@@ -1,0 +1,45 @@
+# Dependencies
+node_modules
+
+# Git
+.git
+.gitignore
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.dev
+.env.production
+
+# Build outputs
+dist
+build
+coverage
+.turbo
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Config files (not needed in build)
+.prettierrc
+.eslintrc*
+.editorconfig
+
+# Docker (빌드 컨텍스트에 불필요)
+docker-compose*.yml
+.dockerignore
+
+# Documentation (빌드에 불필요하지만 포함해도 무방)
+*.md
