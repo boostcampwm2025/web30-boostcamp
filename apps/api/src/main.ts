@@ -9,7 +9,7 @@ async function bootstrap() {
 
   // ConfigService를 사용하여 환경변수 가져오기
   const configService = app.get(ConfigService);
-  const port = configService.get('PORT') || 3000;
+  const port = configService.get<number>('PORT') ?? 3000;
 
   const config = new DocumentBuilder()
     .setTitle('API Docs')
@@ -24,8 +24,8 @@ async function bootstrap() {
   SwaggerModule.setup('api-docs', app, documentFactory);
 
   await app.listen(port);
-  console.log(`Server is running on: http://localhost:${port}`);
-  console.log(`Swagger API Docs: http://localhost:${port}/api-docs`);
+  console.warn(`Server is running on: http://localhost:${port}`);
+  console.warn(`Swagger API Docs: http://localhost:${port}/api-docs`);
 }
 
-bootstrap();
+void bootstrap();
