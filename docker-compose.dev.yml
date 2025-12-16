@@ -5,11 +5,11 @@ services:
     env_file:
       - .env.dev
     ports:
-      - "3306:3306"
+      - '3306:3306'
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -18,11 +18,11 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 3s
       retries: 5
@@ -45,7 +45,7 @@ services:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
     ports:
-      - "3000:3000"
+      - '3000:3000'
     volumes:
       - ./apps/api:/app/apps/api
       - ./packages:/app/packages
@@ -63,7 +63,7 @@ services:
     env_file:
       - .env.dev
     ports:
-      - "5173:5173"
+      - '5173:5173'
     volumes:
       - ./apps/web:/app/apps/web
       - ./packages:/app/packages

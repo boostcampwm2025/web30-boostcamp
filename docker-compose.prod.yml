@@ -10,7 +10,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -24,7 +24,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 3s
       retries: 5
@@ -46,7 +46,7 @@ services:
     environment:
       - NODE_ENV=production
     ports:
-      - "3000:3000"
+      - '3000:3000'
     networks:
       - app-network
 
