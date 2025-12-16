@@ -50,20 +50,6 @@ services:
     networks:
       - app-network
 
-  # 프론트엔드 (React + Vite + Nginx)
-  web:
-    build:
-      context: .
-      dockerfile: apps/web/Dockerfile
-      target: production
-    restart: always
-    depends_on:
-      - api
-    ports:
-      - "80:80"
-    networks:
-      - app-network
-
 volumes:
   mysql_data:
   redis_data:
