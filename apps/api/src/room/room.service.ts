@@ -6,7 +6,7 @@ import { ROOM_CONFIG } from '../../../../packages/constants/socket-event';
 import { Room } from '../../../../packages/types/room';
 
 @Injectable()
-export class GameService {
+export class RoomService {
   constructor(@Inject(REDIS_CLIENT) private readonly redis: Redis) {}
 
   async createRoom(roomId: string): Promise<Room> {
