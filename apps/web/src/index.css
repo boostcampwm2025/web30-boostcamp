@@ -7,12 +7,29 @@
   --color-title: #2c2c2c;
   --color-white: #ffffff;
   --color-black: #000000;
+  --color-border-soft: #0000001a; /* black/10 */
+  --color-overlay: #0000004d; /* black/30 */
 
   /* CTA / gradients */
   --color-cta-main-start: #6129d4;
   --color-cta-main-end: #2d55ff;
   --color-cta-modal-start: #5230e0;
   --color-cta-modal-end: #2b5ee8;
+
+  /* 입장 모달 팔레트 */
+  --color-modal-border: #2f9dea;
+  --color-modal-accent-start: #5d39e4;
+  --color-modal-accent-end: #2d7bff;
+  --color-participant-gradient-start: #e9e4ff;
+  --color-participant-gradient-end: #d8e3ff;
+  --color-participant-icon: #5936e7;
+  --color-participant-check: #4a28c0;
+  --color-participant-badge: #26a65b;
+  --color-spectator-icon: #01a7c2;
+  --color-spectator-badge: #00b0b9;
+  --color-neutral-card-border: #e5e7eb;
+  --color-neutral-muted: #6b7280;
+  --color-neutral-soft: #f3f4f6;
 
   --font-sans: 'Inter', 'Pretendard Variable', system-ui, -apple-system, sans-serif;
 }
@@ -35,4 +52,61 @@ body {
   background: linear-gradient(90deg, #4b2cd3 0%, #008bcc 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* Custom utility classes for design palette */
+.bg-participant-card {
+  background: linear-gradient(
+    180deg,
+    var(--color-participant-gradient-start) 0%,
+    var(--color-participant-gradient-end) 100%
+  );
+}
+
+.bg-cta-main {
+  background: linear-gradient(135deg, var(--color-cta-main-start), var(--color-cta-main-end));
+}
+
+.bg-cta-modal {
+  background: linear-gradient(90deg, var(--color-cta-modal-start), var(--color-cta-modal-end));
+}
+
+.bg-modal-accent {
+  background: linear-gradient(
+    135deg,
+    var(--color-modal-accent-start),
+    var(--color-modal-accent-end)
+  );
+}
+
+.bg-participant-icon {
+  background-color: var(--color-participant-icon);
+}
+
+.text-spectator-icon {
+  color: var(--color-spectator-icon);
+}
+
+.bg-participant-check {
+  background-color: var(--color-participant-check);
+}
+
+.bg-participant-badge {
+  background-color: var(--color-participant-badge);
+}
+
+.bg-spectator-badge {
+  background-color: var(--color-spectator-badge);
+}
+
+.border-soft {
+  border-color: var(--color-border-soft);
+}
+
+.border-neutral-card {
+  border-color: var(--color-neutral-card-border);
+}
+
+.bg-overlay {
+  background-color: var(--color-overlay);
 }

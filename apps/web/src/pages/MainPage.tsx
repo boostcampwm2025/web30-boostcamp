@@ -1,7 +1,21 @@
+import type { UserRole } from '@shared/types/user';
+import { useState } from 'react';
+
+import { JoinModal } from '../components/JoinModal';
+
 export function MainPage() {
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<UserRole>('player');
+  const [participants] = useState({ count: 0, limit: 2 });
+  const [spectators] = useState({ count: 0, limit: Infinity });
+
+  const handleStartBattle = () => {
+    setModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen">
-      <header className="flex items-center gap-3 px-10 py-6 bg-white border-b border-black/5 shadow-sm mb-2">
+      <header className="mb-2 flex items-center gap-3 border-b border-soft bg-white px-10 py-6 shadow-sm">
         <div className="grid h-12 w-12 rounded-2xl bg-brand shadow-lg"></div>
         <div className="flex flex-col">
           <span className="text-lg font-extrabold tracking-tight logo-gradient">CODE RENA</span>
@@ -18,17 +32,26 @@ export function MainPage() {
         </div>
 
         <div className="relative flex-1">
-          <div className="rounded-2xl border border-black/5 bg-white px-12 py-16 text-center shadow-sm">
+          <div className="rounded-2xl border border-soft bg-white px-12 py-16 text-center shadow-sm">
             <button
               type="button"
-              //onClick={handleStartBattle}
-              className="rounded-2xl bg-linear-to-br from-cta-main-start to-cta-main-end px-8 py-4 text-lg font-semibold text-white shadow-md transition hover:scale-[1.02]"
+              onClick={handleStartBattle}
+              className="rounded-2xl bg-cta-main px-8 py-4 text-lg font-semibold text-white shadow-md transition hover:scale-[1.02]"
             >
               배틀 시작하기
             </button>
           </div>
         </div>
       </main>
+
+      <JoinModal
+        open={isModalOpen}
+        onClose={() => setModalOpen(false)}
+        selectedRole={selectedRole}
+        onSelectRole={setSelectedRole}
+        participants={participants}
+        spectators={spectators}
+      />
     </div>
   );
 }
