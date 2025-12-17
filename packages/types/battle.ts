@@ -18,6 +18,7 @@ export interface Battle {
 
 export interface BattleUser {
     userId: string;
+    battleId: string;
     code: string;
     language: string;
 
@@ -32,4 +33,24 @@ export interface BattleUser {
     disconnectedAt?: Date;
 
     result?: BattleResult;
+}
+
+export interface CreateBattleDTO {
+    roomId: string;
+    config: {
+        duration: number;
+    }
+    users: string[];
+}
+
+export interface UpdateBattleUserDTO {
+    userId: string;
+    battleId: string;
+    code?: string;
+
+    progress: {
+        passedCount: number;
+        totalCount: number;
+    };
+    isFinished?: boolean;
 }
