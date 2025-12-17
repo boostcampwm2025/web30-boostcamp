@@ -19,43 +19,13 @@ function BattleHeader() {
             <span className="text-lg text-emerald-300">27:16</span>
           </div>
         </div>
-
+        <span className="flex items-center gap-2 rounded-full bg-rose-500/20 px-3 py-1 text-rose-200">
+          ● LIVE
+        </span>
+        <span className="rounded-full bg-slate-800 px-3 py-1 text-slate-200">관전자 23명</span>
         <button className="ml-auto inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-slate-500 hover:bg-slate-800">
           나가기
         </button>
-      </div>
-
-      <div className="flex w-full flex-row gap-5">
-        <div className="flex flex-1 items-center gap-2 min-w-[220px]">
-          <div className="flex items-center gap-2 text-xs font-semibold text-emerald-300">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" />
-            You
-          </div>
-          <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-slate-800">
-            <span className="absolute left-0 top-0 h-full w-[12%] bg-emerald-400" />
-            <span className="absolute left-0 top-0 h-full w-full bg-emerald-600/30" />
-            <span className="absolute left-0 top-0 h-full w-[60%] bg-emerald-600" />
-          </div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
-            <span>0%</span>
-          </div>
-        </div>
-
-        <div className="flex flex-1 items-center gap-2 min-w-[220px]">
-          <div className="flex items-center gap-2 text-xs font-semibold text-emerald-300">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-pink-600 text-[10px] font-bold text-white">
-              C
-            </div>
-          </div>
-          <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-slate-800">
-            <span className="absolute left-0 top-0 h-full w-[12%] bg-emerald-400" />
-            <span className="absolute left-0 top-0 h-full w-full bg-pink-600/30" />
-            <span className="absolute left-0 top-0 h-full w-[60%] bg-pink-600" />
-          </div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-pink-300">
-            <span>0%</span>
-          </div>
-        </div>
       </div>
     </header>
   );
