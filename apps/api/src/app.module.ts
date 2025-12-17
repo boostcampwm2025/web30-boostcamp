@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './app.controller';
+import { GameModule } from './game/game.module';
 import { RedisModule } from './redis/redis.module';
 
 @Module({
@@ -35,6 +36,8 @@ import { RedisModule } from './redis/redis.module';
 
     // 3. Redis 연결 설정
     RedisModule,
+
+    GameModule,
   ],
   controllers: [AppController],
   providers: [],
