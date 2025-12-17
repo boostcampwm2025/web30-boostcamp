@@ -1,11 +1,20 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
-  --color-brand: #6d28d9;
-  --color-brand-foreground: #f5f3ff;
-  --color-surface: #f8fafc;
+  --color-brand: #5631e7;
+  --color-surface: #f9fbfc; /* 메인페이지 배경 */
   --color-ink: #0f172a;
-  --font-sans: "Inter", "Pretendard Variable", system-ui, -apple-system, sans-serif;
+  --color-title: #2c2c2c;
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* CTA / gradients */
+  --color-cta-main-start: #6129d4;
+  --color-cta-main-end: #2d55ff;
+  --color-cta-modal-start: #5230e0;
+  --color-cta-modal-end: #2b5ee8;
+
+  --font-sans: 'Inter', 'Pretendard Variable', system-ui, -apple-system, sans-serif;
 }
 
 :root {
@@ -20,4 +29,10 @@
 
 body {
   margin: 0;
+}
+
+.logo-gradient {
+  background: linear-gradient(90deg, #4b2cd3 0%, #008bcc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
