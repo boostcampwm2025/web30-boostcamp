@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 
 import { ROOM_CONFIG } from '../../../../packages/constants/socket-event';
 import { REDIS_CLIENT } from '../redis/redis.module';
+import { RedisKeys } from '../redis/redis-key.constant';
 import { RoomService } from './room.service';
 
 describe('RoomService', () => {
@@ -47,7 +48,7 @@ describe('RoomService', () => {
     it('Redis에 방 정보를 저장해야 한다', async () => {
       await service.createRoom('1');
 
-      expect(mockRedis.set).toHaveBeenCalledWith('room:1:info', expect.any(String));
+      expect(mockRedis.set).toHaveBeenCalledWith(RedisKeys.room('1'), expect.any(String));
     });
   });
 });
