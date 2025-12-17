@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import Redis from 'ioredis';
-import { REDIS_CLIENT } from 'src/redis/redis.module';
 
 import { ROOM_CONFIG } from '../../../../packages/constants/socket-event';
 import { Room } from '../../../../packages/types/room';
+import { REDIS_CLIENT } from '../redis/redis.module';
 
 @Injectable()
 export class RoomService {
