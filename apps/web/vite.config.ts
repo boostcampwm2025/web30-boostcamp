@@ -8,6 +8,8 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
+      '@shared/types': path.resolve(__dirname, '../../packages/types'),
+      '@shared/constants': path.resolve(__dirname, '../../packages/constants'),
       '@': path.resolve(__dirname, 'src'),
     },
   },

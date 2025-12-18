@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "lucide-react": "^0.460.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.10.1"
@@ -19,6 +20,7 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
+    "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "^5.1.1",
     "@web30/eslint-config": "workspace:*",
     "autoprefixer": "^10.4.22",
