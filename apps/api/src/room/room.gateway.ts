@@ -110,29 +110,4 @@ export class RoomGateway implements OnModuleInit {
       playerCount: room.currentPlayers.length,
     });
   }
-
-  @SubscribeMessage(SOCKET_EVENT.LEAVE_ROOM)
-  async handleLeaveRoom(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: { roomId: string },
-  ) {
-    const { roomId } = data;
-    const userId = client.id;
-
-    const room = await this.roomService.removeUser(roomId, userId);
-
-    if (!room) {
-      client.emit(SOCKET_EVENT.ERROR, {
-        code: SOCKET_ERROR.ROOM_NOT_FOUND,
-        message: '방을 찾을 수 없습니다.',
-      });
-      return;
-    }
-
-    await client.leave(roomId);
-
-    client.to(roomId).emit(SOCKET_EVENT.ROOM_USER_LEFT, {
-      playerCount: room.currentPlayers.length,
-    });
-  }
 }
