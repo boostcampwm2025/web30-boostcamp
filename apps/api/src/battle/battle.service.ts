@@ -46,15 +46,24 @@ export class BattleService {
     return this.battleRedisService.getBattle(battleId);
   }
 
-  async getBattleByRoomId(roomId: string): Promise<Battle | null> {
-    // TODO: 권한 체크 추가 (사용자가 해당 방에 참여 중인지 또는 비밀번호 존재 등)
-    // TODO: 배틀 상태 검증 (종료된 배틀인지 등)
-    return this.battleRedisService.getBattleByRoomId(roomId);
-  }
-
   async updateUserCode(dto: UpdateUserCodeDTO): Promise<Battle | null> {
     // TODO: 권한 체크 추가 (해당 userId가 코드를 수정할 권한이 있는지)
     // TODO: 배틀 상태 검증 (종료된 배틀은 수정 불가)
-    return this.battleRedisService.updateUserCode(dto);
+
+    const battleId = await this.battleRedisService.getBattleIdByRoomId(dto.roomId);
+    if (!battleId) return null;
+
+    const battle = await this.battleRedisService.getBattle(battleId);
+    if (!battle) return null;
+
+    const user = battle.users.find((u) => u.userId === dto.userId);
+    if (!user) return null;
+
+    user.code = dto.code;
+    user.language = dto.language;
+
+    await this.battleRedisService.updateBattle(battle);
+
+    return battle;
   }
 }
