@@ -1,36 +1,21 @@
 import { BATTLE_EVENTS } from '@shared/constants/battle';
-import { SOCKET_EVENT } from '@shared/constants/socket-event';
-import type { UserRole } from '@shared/types/user';
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
 
-type Player = {
-  roomId: string;
-  role: UserRole;
-  userId: string;
-  username: string;
-};
+import { useRoomStore } from '@/store/roomStore';
 
 function CodeSpectator() {
   const { roomId: roomIdParam } = useParams<{ roomId?: string }>();
   const [searchParams] = useSearchParams();
   const roomId = roomIdParam ?? searchParams.get('roomId') ?? 'room-unknown';
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [selectedId, setSelectedId] = useState(players[0].userId);
-  const [codes, setCodes] = useState<Record<string, string>>({});
+  const { players, codes, setPlayers, setMe, upsertCode, upsertPlayer } = useRoomStore(
+    (state) => state,
+  );
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
     const client: Socket = io('/', { transports: ['websocket'], autoConnect: true });
-
-    // 참가자 목록/상태 동기화
-    const handlePlayers = (payload: { roomId: string; players: Player[] }) => {
-      if (payload.roomId !== roomId) return;
-      setPlayers(payload.players);
-      if (!selectedId && payload.players.length) {
-        setSelectedId(payload.players[0].userId);
-      }
-    };
 
     const handleCodeUpdate = (payload: {
       roomId: string;
@@ -39,19 +24,18 @@ function CodeSpectator() {
       language: string;
     }) => {
       if (payload.roomId !== roomId) return;
-      setCodes((prev) => ({ ...prev, [payload.userId]: payload.code }));
+      upsertCode(payload.userId, payload.code);
     };
-    client.on(SOCKET_EVENT.ROOM_STATE_SYNC, handlePlayers);
     client.on(BATTLE_EVENTS.CODE_UPDATED, handleCodeUpdate);
 
     return () => {
-      client.on(SOCKET_EVENT.ROOM_STATE_SYNC, handlePlayers);
       client.off(BATTLE_EVENTS.CODE_UPDATED, handleCodeUpdate);
       client.disconnect();
     };
-  }, [roomId]);
+  }, [roomId, setMe, setPlayers, upsertCode, upsertPlayer]);
 
-  const selectedCode = selectedId ? (codes[selectedId] ?? '') : '';
+  const activeSelectedId = selectedId ?? players[0]?.userId ?? null;
+  const selectedCode = activeSelectedId ? (codes[activeSelectedId] ?? '') : '';
 
   return (
     <>
