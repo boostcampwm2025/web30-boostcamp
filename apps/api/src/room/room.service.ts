@@ -31,4 +31,35 @@ export class RoomService {
       },
     };
   }
+
+  async getRoom(roomId: string): Promise<Room | null> {
+    const key = RedisKeys.room(roomId);
+    const data = await this.redis.get(key);
+
+    if (!data) {
+      return null;
+    }
+
+    return JSON.parse(data) as Room;
+  }
+
+  async getRoomAvailability(
+    roomId: string,
+  ): Promise<{ playerCount: number; isAvailable: boolean }> {
+    const room = await this.getRoom(roomId);
+
+    if (!room) {
+      return { playerCount: 0, isAvailable: false };
+    }
+
+    const playerCount = room.currentPlayers.length;
+    const isAvailable = playerCount < ROOM_CONFIG.MAX_PLAYERS;
+
+    return { playerCount, isAvailable };
+  }
+
+  async saveRoom(room: Room): Promise<void> {
+    const key = RedisKeys.room(room.roomId);
+    await this.redis.set(key, JSON.stringify(room));
+  }
 }
