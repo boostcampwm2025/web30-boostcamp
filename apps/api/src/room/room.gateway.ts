@@ -86,5 +86,15 @@ export class RoomGateway implements OnModuleInit {
     await this.roomService.saveRoom(room);
 
     await client.join(roomId);
+
+    client.emit(SOCKET_EVENT.ROOM_STATE_SYNC, {
+      roomId: room.roomId,
+      role: requestedRole,
+      username: username,
+    });
+
+    client.to(roomId).emit(SOCKET_EVENT.ROOM_USER_JOINED, {
+      playerCount: room.currentPlayers.length,
+    });
   }
 }
