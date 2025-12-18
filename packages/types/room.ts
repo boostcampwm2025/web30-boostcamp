@@ -1,4 +1,4 @@
-import { RoomUser } from './user';
+import type { RoomUser, UserRole } from './user';
 
 export type RoomStatus = 'waiting' | 'in-battle';
 
@@ -27,14 +27,26 @@ export interface RoomCreateDTO {
   settings: RoomSettings;
 }
 
+// === Socket DTOs ===
+
 // CHECK_ROOM_AVAILABILITY_REQUEST DTO
 export interface RoomAvailabilityRequestDTO {
   roomId: string;
 }
-
 // ROOM_AVAILABILITY_RESPONSE DTO
 export interface RoomAvailabilityResponseDTO {
   roomId: string;
   playerCount: number;
   isAvailable: boolean;
+}
+
+// 방 입장 요청/응답
+export interface JoinRoomRequest {
+  roomId: string;
+  requestedRole: UserRole;
+}
+
+export interface JoinRoomResponse {
+  roomId: string;
+  role: UserRole;
 }
