@@ -41,6 +41,13 @@ export class BattleService {
     return battle;
   }
 
+  /*
+  async joinBattle(roomId: string, userId: string): Promise<null> {
+    // TODO: JOIN_ROOM 이후 자동 호출
+    return null;
+  }
+  */
+
   async getBattle(battleId: string): Promise<Battle | null> {
     // TODO: 권한 체크 추가 (사용자가 해당 배틀에 접근 가능한지 또는 비밀번호 존재 등)
     return this.battleRedisService.getBattle(battleId);

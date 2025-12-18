@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import Redis from 'ioredis';
 
 import { ROOM_CONFIG } from '../../../../packages/constants/socket-event';
-import { Room } from '../../../../packages/types/room';
+import { Room, RoomAvailabilityResponseDTO } from '../../../../packages/types/room';
 import { REDIS_CLIENT } from '../redis/redis.module';
 import { RedisKeys } from '../redis/redis-key.constant';
 
@@ -43,19 +43,17 @@ export class RoomService {
     return JSON.parse(data) as Room;
   }
 
-  async getRoomAvailability(
-    roomId: string,
-  ): Promise<{ playerCount: number; isAvailable: boolean }> {
+  async getRoomAvailability(roomId: string): Promise<RoomAvailabilityResponseDTO> {
     const room = await this.getRoom(roomId);
 
     if (!room) {
-      return { playerCount: 0, isAvailable: false };
+      return { roomId, playerCount: 0, isAvailable: false };
     }
 
     const playerCount = room.currentPlayers.length;
     const isAvailable = playerCount < ROOM_CONFIG.MAX_PLAYERS;
 
-    return { playerCount, isAvailable };
+    return { roomId, playerCount, isAvailable };
   }
 
   async saveRoom(room: Room): Promise<void> {

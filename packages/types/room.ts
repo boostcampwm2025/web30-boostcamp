@@ -26,3 +26,15 @@ export interface RoomCreateDTO {
   hostId: string;
   settings: RoomSettings;
 }
+
+// CHECK_ROOM_AVAILABILITY_REQUEST DTO
+export interface RoomAvailabilityRequestDTO {
+  roomId: string;
+}
+
+// ROOM_AVAILABILITY_RESPONSE DTO
+export interface RoomAvailabilityResponseDTO {
+  roomId: string;
+  playerCount: number;
+  isAvailable: boolean;
+}
