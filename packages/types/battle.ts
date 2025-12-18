@@ -54,3 +54,9 @@ export interface UpdateBattleUserDTO {
   };
   isFinished?: boolean;
 }
+
+export interface UpdateUserCodeDTO {
+  battleId: string;
+  userId: string;
+  code: string;
+}
