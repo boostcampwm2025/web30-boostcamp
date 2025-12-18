@@ -14,18 +14,26 @@ interface BattleSocketState {
   socket: Socket | null;
   isConnected: boolean;
   roomAvailability: RoomAvailabilityResponseDTO | null;
+  availabilityListener: ((payload: RoomAvailabilityResponseDTO) => void) | null;
+  joinedListener: ((payload: { playerCount: number }) => void) | null;
+  leftListener: ((payload: { playerCount: number }) => void) | null;
   connect: () => Socket;
   disconnect: () => void;
   requestRoomAvailability: (
     payload: RoomAvailabilityRequestDTO,
   ) => Promise<RoomAvailabilityResponseDTO>;
   joinRoom: (payload: JoinRoomRequest) => Promise<JoinRoomResponse>;
+  subscribeRoomAvailability: (roomId: string) => void;
+  unsubscribeRoomAvailability: () => void;
 }
 
 export const useBattleSocketStore = create<BattleSocketState>((set, get) => ({
   socket: null,
   isConnected: false,
   roomAvailability: null,
+  availabilityListener: null,
+  joinedListener: null,
+  leftListener: null,
   // 단일 소켓 인스턴스를 유지하고 기본 연결 상태를 관리합니다.
   connect: () => {
     const existing = get().socket;
@@ -48,6 +56,7 @@ export const useBattleSocketStore = create<BattleSocketState>((set, get) => ({
   },
   // 소켓과 방 상태를 정리합니다.
   disconnect: () => {
+    get().unsubscribeRoomAvailability();
     disconnectBattleSocket();
     set({ isConnected: false, socket: null, roomAvailability: null });
   },
@@ -83,4 +92,68 @@ export const useBattleSocketStore = create<BattleSocketState>((set, get) => ({
         resolve(response);
       });
     }),
+  subscribeRoomAvailability: (roomId: string) => {
+    const socket = get().connect();
+
+    const handleAvailability = (payload: RoomAvailabilityResponseDTO) => {
+      if (payload.roomId !== roomId) return;
+      set({ roomAvailability: payload });
+    };
+
+    const handleJoined = (payload: { playerCount: number }) => {
+      set((state) => {
+        if (!state.roomAvailability) return state;
+        return {
+          roomAvailability: {
+            ...state.roomAvailability,
+            playerCount: payload.playerCount,
+          },
+        };
+      });
+    };
+
+    const handleLeft = (payload: { playerCount: number }) => {
+      set((state) => {
+        if (!state.roomAvailability) return state;
+        return {
+          roomAvailability: {
+            ...state.roomAvailability,
+            playerCount: payload.playerCount,
+          },
+        };
+      });
+    };
+
+    socket.off(SOCKET_EVENT.ROOM_AVAILABILITY);
+    socket.off(SOCKET_EVENT.ROOM_USER_JOINED);
+    socket.off(SOCKET_EVENT.ROOM_USER_LEFT);
+
+    socket.on(SOCKET_EVENT.ROOM_AVAILABILITY, handleAvailability);
+    socket.on(SOCKET_EVENT.ROOM_USER_JOINED, handleJoined);
+    socket.on(SOCKET_EVENT.ROOM_USER_LEFT, handleLeft);
+
+    set({
+      availabilityListener: handleAvailability,
+      joinedListener: handleJoined,
+      leftListener: handleLeft,
+    });
+  },
+  unsubscribeRoomAvailability: () => {
+    const socket = get().socket;
+    if (!socket) return;
+
+    const { availabilityListener, joinedListener, leftListener } = get();
+
+    if (availabilityListener) {
+      socket.off(SOCKET_EVENT.ROOM_AVAILABILITY, availabilityListener);
+    }
+    if (joinedListener) {
+      socket.off(SOCKET_EVENT.ROOM_USER_JOINED, joinedListener);
+    }
+    if (leftListener) {
+      socket.off(SOCKET_EVENT.ROOM_USER_LEFT, leftListener);
+    }
+
+    set({ availabilityListener: null, joinedListener: null, leftListener: null });
+  },
 }));

@@ -14,13 +14,21 @@ function MainPage() {
   const [selectedRole, setSelectedRole] = useState<UserRole>('player');
   const [joinError, setJoinError] = useState('');
   const [isJoining, setIsJoining] = useState(false);
-  const { connect, disconnect, requestRoomAvailability, roomAvailability, joinRoom } =
-    useBattleSocketStore();
+  const {
+    connect,
+    disconnect,
+    requestRoomAvailability,
+    roomAvailability,
+    joinRoom,
+    subscribeRoomAvailability,
+    unsubscribeRoomAvailability,
+  } = useBattleSocketStore();
 
   const handleCloseModal = () => {
     setModalOpen(false);
     setJoinError('');
     setIsJoining(false);
+    unsubscribeRoomAvailability();
   };
 
   const participants = {
@@ -38,6 +46,7 @@ function MainPage() {
     requestRoomAvailability({ roomId: DEFAULT_ROOM_ID }).catch((error) => {
       setJoinError(error instanceof Error ? error.message : '인원 정보를 불러오지 못했습니다.');
     });
+    subscribeRoomAvailability(DEFAULT_ROOM_ID);
     setModalOpen(true);
   };
 
@@ -45,7 +54,7 @@ function MainPage() {
     setJoinError('');
     setIsJoining(true);
     try {
-      const response = await joinRoom({ roomId: DEFAULT_ROOM_ID, role: selectedRole });
+      const response = await joinRoom({ roomId: DEFAULT_ROOM_ID, requestedRole: selectedRole });
       const role = response.role ?? selectedRole;
       const search = role === 'spectator' ? '?mode=spectator' : '';
       setModalOpen(false);
