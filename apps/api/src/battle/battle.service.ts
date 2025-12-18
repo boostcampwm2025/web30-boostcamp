@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BATTLE_CONFIG } from '@packages/constants/battle';
 import { Battle, BattleUser, CreateBattleDTO, UpdateUserCodeDTO } from '@packages/types/battle';
+import { RoomUser } from '@packages/types/user';
 
 import { BattleRedisService } from '@/battle/battle-redis.service';
 
@@ -41,12 +42,58 @@ export class BattleService {
     return battle;
   }
 
-  /*
-  async joinBattle(roomId: string, userId: string): Promise<null> {
-    // TODO: JOIN_ROOM 이후 자동 호출
-    return null;
+  // 배틀 입장
+  async joinBattle(roomId: string, user: RoomUser): Promise<Battle | null> {
+    const battleId = await this.battleRedisService.getBattleIdByRoomId(roomId);
+    if (!battleId) return null;
+
+    const battle = await this.battleRedisService.getBattle(battleId);
+    if (!battle) return null;
+
+    // TODO: 참가자 or 관전자 구분 로직 추가
+    // 현재는 모두 참가자로 간주
+    const existingUser = battle.users.find((u) => u.userId === user.userId);
+    if (existingUser) {
+      existingUser.isConnected = true;
+      existingUser.disconnectedAt = undefined;
+    } else {
+      const newBattleUser: BattleUser = {
+        userId: user.userId,
+        battleId: battle.battleId,
+        code: '',
+        language: BATTLE_CONFIG.DEFAULT_LANGUAGE,
+        progress: {
+          passedCount: 0,
+          totalCount: 0,
+        },
+        isConnected: true,
+        isFinished: false,
+      };
+
+      battle.users.push(newBattleUser);
+    }
+
+    await this.battleRedisService.updateBattle(battle);
+
+    return battle;
   }
-  */
+
+  // 배틀 나가기
+  async leaveBattle(roomId: string, userId: string): Promise<Battle | null> {
+    const battleId = await this.battleRedisService.getBattleIdByRoomId(roomId);
+    if (!battleId) return null;
+
+    const battle = await this.battleRedisService.getBattle(battleId);
+    if (!battle) return null;
+
+    // MVP 단계에서는 배틀 퇴장시 배틀 참가자에서 제외
+    // TODO: 참가자 다시 입장시 복구 로직 추가 (disconnectedAt 등 활용)
+    battle.users = battle.users.filter((u) => u.userId !== userId);
+
+    await this.battleRedisService.updateBattle(battle);
+
+    return battle;
+  }
 
   async getBattle(battleId: string): Promise<Battle | null> {
     // TODO: 권한 체크 추가 (사용자가 해당 배틀에 접근 가능한지 또는 비밀번호 존재 등)
