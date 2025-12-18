@@ -37,7 +37,7 @@ export class RoomGateway implements OnModuleInit {
 
     const availability = await this.roomService.getRoomAvailability(roomId);
 
-    client.emit(SOCKET_EVENT.CHECK_ROOM_AVAILABILITY, availability);
+    client.emit(SOCKET_EVENT.ROOM_AVAILABILITY, availability);
 
     return availability;
   }
