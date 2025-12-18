@@ -1,13 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { BATTLE_CONFIG } from '@packages/constants/battle';
+import { Battle, BattleUser, CreateBattleDTO, UpdateUserCodeDTO } from '@packages/types/battle';
 
-import { BATTLE_CONFIG } from '../../../../packages/constants/battle';
-import {
-  Battle,
-  BattleUser,
-  CreateBattleDTO,
-  UpdateUserCodeDTO,
-} from '../../../../packages/types/battle';
-import { BattleRedisService } from './battle-redis.service';
+import { BattleRedisService } from '@/battle/battle-redis.service';
 
 @Injectable()
 export class BattleService {

@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { Battle, UpdateUserCodeDTO } from '@packages/types/battle';
 import Redis from 'ioredis';
 
-import { Battle, UpdateUserCodeDTO } from '../../../../packages/types/battle';
-import { REDIS_CLIENT } from '../redis/redis.module';
-import { RedisKeys } from '../redis/redis-key.constant';
+import { REDIS_CLIENT } from '@/redis/redis.module';
+import { RedisKeys } from '@/redis/redis-key.constant';
 
 @Injectable()
 export class BattleRedisService {
