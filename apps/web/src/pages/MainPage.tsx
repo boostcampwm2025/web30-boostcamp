@@ -14,15 +14,17 @@ function MainPage() {
   const [selectedRole, setSelectedRole] = useState<UserRole>('player');
   const [joinError, setJoinError] = useState('');
   const [isJoining, setIsJoining] = useState(false);
-  const {
-    connect,
-    disconnect,
-    requestRoomAvailability,
-    roomAvailability,
-    joinRoom,
-    subscribeRoomAvailability,
-    unsubscribeRoomAvailability,
-  } = useBattleSocketStore();
+  const connect = useBattleSocketStore((state) => state.connect);
+  const disconnect = useBattleSocketStore((state) => state.disconnect);
+  const requestRoomAvailability = useBattleSocketStore((state) => state.requestRoomAvailability);
+  const roomAvailability = useBattleSocketStore((state) => state.roomAvailability);
+  const joinRoom = useBattleSocketStore((state) => state.joinRoom);
+  const subscribeRoomAvailability = useBattleSocketStore(
+    (state) => state.subscribeRoomAvailability,
+  );
+  const unsubscribeRoomAvailability = useBattleSocketStore(
+    (state) => state.unsubscribeRoomAvailability,
+  );
 
   const handleCloseModal = () => {
     setModalOpen(false);

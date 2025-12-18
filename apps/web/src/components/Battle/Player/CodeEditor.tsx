@@ -10,7 +10,8 @@ function CodeEditor() {
   const { roomId: roomIdParam } = useParams<{ roomId?: string }>();
   const [searchParams] = useSearchParams();
   const roomId = roomIdParam ?? searchParams.get('roomId') ?? 'room-unknown';
-  const { me, setMe } = useRoomStore((state) => ({ me: state.me, setMe: state.setMe }));
+  const me = useRoomStore((state: { me?: unknown }) => state.me);
+  const setMe = useRoomStore((state: { setMe: (me: unknown) => void }) => state.setMe);
 
   // 소켓은 useMemo로 생성 후 useEffect로 언마운트 시 disconnect
   const socket = useMemo(
@@ -52,7 +53,7 @@ function CodeEditor() {
     return () => {
       socket.off(SOCKET_EVENT.ROOM_STATE_SYNC, handleStateSync);
     };
-  }, [roomId, setMe, socket]);
+  }, [roomId, socket]);
 
   const handleChange = (value: string) => {
     setCode(value);

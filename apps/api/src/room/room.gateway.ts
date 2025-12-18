@@ -40,7 +40,6 @@ export class RoomGateway implements OnModuleInit {
 
     await client.join(roomId);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const availability = await this.roomService.getRoomAvailability(roomId);
 
     client.emit(SOCKET_EVENT.ROOM_AVAILABILITY, availability);

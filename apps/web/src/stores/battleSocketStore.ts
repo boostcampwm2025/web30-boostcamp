@@ -4,6 +4,7 @@ import type {
   JoinRoomResponse,
   RoomAvailabilityRequestDTO,
   RoomAvailabilityResponseDTO,
+  RoomStateSyncPayload,
 } from '@shared/types/room';
 import type { Socket } from 'socket.io-client';
 import { create } from 'zustand';
@@ -89,22 +90,33 @@ export const useBattleSocketStore = create<BattleSocketState>((set, get) => ({
     new Promise((resolve, reject) => {
       const socket = get().connect();
       let settled = false;
-
-      const timeout = setTimeout(() => {
-        if (settled) return;
+      const cleanup = () => {
         settled = true;
-        reject(new Error('JOIN_ROOM_TIMEOUT'));
-      }, 4000);
+        socket.off(SOCKET_EVENT.ROOM_STATE_SYNC, handleSync);
+        socket.off(SOCKET_EVENT.ERROR, handleError);
+      };
+
+      const handleSync = (response: RoomStateSyncPayload) => {
+        if (settled) return;
+        cleanup();
+        resolve({ roomId: response.roomId, role: response.role });
+      };
+
+      const handleError = (error: { message?: string }) => {
+        if (settled) return;
+        cleanup();
+        reject(new Error(error?.message ?? 'JOIN_ROOM_FAILED'));
+      };
+
+      socket.on(SOCKET_EVENT.ROOM_STATE_SYNC, handleSync);
+      socket.on(SOCKET_EVENT.ERROR, handleError);
 
       socket.emit(SOCKET_EVENT.JOIN_ROOM, payload, (response: JoinRoomResponse | undefined) => {
         if (settled) return;
-        settled = true;
-        clearTimeout(timeout);
-        if (!response) {
-          resolve({ roomId: payload.roomId, role: payload.requestedRole });
-          return;
+        if (response) {
+          cleanup();
+          resolve(response);
         }
-        resolve(response);
       });
     }),
   subscribeRoomAvailability: (roomId: string) => {
