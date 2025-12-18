@@ -35,11 +35,10 @@ export class RoomGateway implements OnModuleInit {
 
     await client.join(roomId);
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const availability = await this.roomService.getRoomAvailability(roomId);
 
     client.emit(SOCKET_EVENT.ROOM_AVAILABILITY, availability);
-
-    return availability;
   }
 
   @SubscribeMessage(SOCKET_EVENT.JOIN_ROOM)
@@ -100,6 +99,31 @@ export class RoomGateway implements OnModuleInit {
 
     // 같은 방 다른 사람들에게 새 유저 입장 알림
     client.to(roomId).emit(SOCKET_EVENT.ROOM_USER_JOINED, {
+      playerCount: room.currentPlayers.length,
+    });
+  }
+
+  @SubscribeMessage(SOCKET_EVENT.LEAVE_ROOM)
+  async handleLeaveRoom(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { roomId: string },
+  ) {
+    const { roomId } = data;
+    const userId = client.id;
+
+    const room = await this.roomService.removeUser(roomId, userId);
+
+    if (!room) {
+      client.emit(SOCKET_EVENT.ERROR, {
+        code: SOCKET_ERROR.ROOM_NOT_FOUND,
+        message: '방을 찾을 수 없습니다.',
+      });
+      return;
+    }
+
+    await client.leave(roomId);
+
+    client.to(roomId).emit(SOCKET_EVENT.ROOM_USER_LEFT, {
       playerCount: room.currentPlayers.length,
     });
   }

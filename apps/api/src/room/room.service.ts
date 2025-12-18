@@ -60,4 +60,19 @@ export class RoomService {
     const key = RedisKeys.room(room.roomId);
     await this.redis.set(key, JSON.stringify(room));
   }
+
+  async removeUser(roomId: string, userId: string): Promise<Room | null> {
+    const room = await this.getRoom(roomId);
+
+    if (!room) {
+      return null;
+    }
+
+    room.currentPlayers = room.currentPlayers.filter((user) => user.userId !== userId);
+    room.currentSpectators = room.currentSpectators.filter((user) => user.userId !== userId);
+
+    await this.saveRoom(room);
+
+    return room;
+  }
 }
