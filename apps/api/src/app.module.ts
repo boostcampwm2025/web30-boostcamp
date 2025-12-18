@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './app.controller';
 import { RedisModule } from './redis/redis.module';
+import { RoomModule } from './room/room.module';
 
 @Module({
   imports: [
@@ -35,6 +36,8 @@ import { RedisModule } from './redis/redis.module';
 
     // 3. Redis 연결 설정
     RedisModule,
+
+    RoomModule,
   ],
   controllers: [AppController],
   providers: [],
