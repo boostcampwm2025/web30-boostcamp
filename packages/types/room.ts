@@ -43,7 +43,7 @@ export interface RoomAvailabilityResponseDTO {
 // 방 입장 요청/응답
 export interface JoinRoomRequest {
   roomId: string;
-  role: UserRole;
+  requestedRole: UserRole;
 }
 
 export interface JoinRoomResponse {

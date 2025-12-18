@@ -86,9 +86,24 @@ export const useBattleSocketStore = create<BattleSocketState>((set, get) => ({
     }),
   // 방 입장 요청을 보낸다.
   joinRoom: (payload: JoinRoomRequest) =>
-    new Promise((resolve) => {
+    new Promise((resolve, reject) => {
       const socket = get().connect();
-      socket.emit(SOCKET_EVENT.JOIN_ROOM, payload, (response: JoinRoomResponse) => {
+      let settled = false;
+
+      const timeout = setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        reject(new Error('JOIN_ROOM_TIMEOUT'));
+      }, 4000);
+
+      socket.emit(SOCKET_EVENT.JOIN_ROOM, payload, (response: JoinRoomResponse | undefined) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeout);
+        if (!response) {
+          resolve({ roomId: payload.roomId, role: payload.requestedRole });
+          return;
+        }
         resolve(response);
       });
     }),
