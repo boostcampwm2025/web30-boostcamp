@@ -4,14 +4,15 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 
+import type { Player } from '@/store/roomStore';
 import { useRoomStore } from '@/store/roomStore';
 
 function CodeEditor() {
   const { roomId: roomIdParam } = useParams<{ roomId?: string }>();
   const [searchParams] = useSearchParams();
   const roomId = roomIdParam ?? searchParams.get('roomId') ?? 'room-unknown';
-  const me = useRoomStore((state: { me?: unknown }) => state.me);
-  const setMe = useRoomStore((state: { setMe: (me: unknown) => void }) => state.setMe);
+  const me = useRoomStore((state: { me?: Player }) => state.me);
+  const setMe = useRoomStore((state: { setMe: (me: Player) => void }) => state.setMe);
 
   // 소켓은 useMemo로 생성 후 useEffect로 언마운트 시 disconnect
   const socket = useMemo(
