@@ -3,7 +3,7 @@ import { useState } from 'react';
 
 import { JoinModal } from '../components/JoinModal';
 
-export function MainPage() {
+function MainPage() {
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<UserRole>('player');
   const [participants] = useState({ count: 0, limit: 2 });
@@ -55,3 +55,5 @@ export function MainPage() {
     </div>
   );
 }
+
+export default MainPage;

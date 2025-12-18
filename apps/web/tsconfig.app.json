@@ -15,11 +15,6 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
-    "baseUrl": ".",
-    "paths": {
-      "@shared/types/*": ["../../packages/types/*"],
-      "@shared/constants/*": ["../../packages/constants/*"]
-    },
 
     /* Linting */
     "strict": true,
@@ -30,7 +25,11 @@
     "noUncheckedSideEffectImports": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@shared/types": ["../../packages/types"],
+      "@shared/types/*": ["../../packages/types/*"],
+      "@shared/constants": ["../../packages/constants"],
+      "@shared/constants/*": ["../../packages/constants/*"]
     }
   },
   "include": ["src"]
