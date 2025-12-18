@@ -1,4 +1,6 @@
 import { BATTLE_EVENTS } from '@shared/constants/battle';
+import { SOCKET_EVENT } from '@shared/constants/socket-event';
+import type { UserRole } from '@shared/types/user';
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 
@@ -9,17 +11,28 @@ function CodeSpectator() {
   const { roomId: roomIdParam } = useParams<{ roomId?: string }>();
   const [searchParams] = useSearchParams();
   const roomId = roomIdParam ?? searchParams.get('roomId') ?? 'room-unknown';
-  const { players, codes, setPlayers, setMe, upsertCode, upsertPlayer } = useRoomStore(
-    (state) => state,
-  );
+  const { players, codes } = useRoomStore((state) => state);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const client = useBattleSocketStore((state) => state.socket);
+  const socket = useBattleSocketStore((state) => state.socket);
+  const connect = useBattleSocketStore((state) => state.connect);
 
   useEffect(() => {
-    // const client: Socket = io('/', { transports: ['websocket'], autoConnect: true });
-    if (!client) return;
+    const client = socket ?? connect();
+    const { upsertCode, upsertPlayer, setMe } = useRoomStore.getState();
 
+    const handleStateSync = (payload: {
+      roomId: string;
+      role: string;
+      userId: string;
+      username: string;
+    }) => {
+      if (payload.roomId !== roomId) return;
+      const player = { ...payload, role: payload.role as UserRole };
+      upsertPlayer(player);
+      setMe(player);
+      if (!selectedId) setSelectedId(payload.userId);
+    };
     const handleCodeUpdate = (payload: {
       roomId: string;
       userId: string;
@@ -28,14 +41,20 @@ function CodeSpectator() {
     }) => {
       if (payload.roomId !== roomId) return;
       upsertCode(payload.userId, payload.code);
+      if (!selectedId) {
+        setSelectedId(payload.userId);
+      }
     };
+    client.on(SOCKET_EVENT.ROOM_STATE_SYNC, handleStateSync);
+    client.on(BATTLE_EVENTS.CODE_CHANGE, handleCodeUpdate);
     client.on(BATTLE_EVENTS.CODE_UPDATED, handleCodeUpdate);
 
     return () => {
+      client.on(SOCKET_EVENT.ROOM_STATE_SYNC, handleStateSync);
+      client.on(BATTLE_EVENTS.CODE_CHANGE, handleCodeUpdate);
       client.off(BATTLE_EVENTS.CODE_UPDATED, handleCodeUpdate);
-      client.disconnect();
     };
-  }, [roomId, setMe, setPlayers, upsertCode, upsertPlayer]);
+  }, [connect, roomId, selectedId, socket]);
 
   const activeSelectedId = selectedId ?? players[0]?.userId ?? null;
   const selectedCode = activeSelectedId ? (codes[activeSelectedId] ?? '') : '';

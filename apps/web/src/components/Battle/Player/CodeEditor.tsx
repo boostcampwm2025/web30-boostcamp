@@ -17,15 +17,6 @@ function CodeEditor() {
   const socket = useBattleSocketStore((state) => state.socket);
   const connect = useBattleSocketStore((state) => state.connect);
 
-  // 소켓은 useMemo로 생성 후 useEffect로 언마운트 시 disconnect
-  // const socket = useMemo(
-  //   () =>
-  //     io('/', {
-  //       transports: ['websocket'],
-  //       autoConnect: true,
-  //     }),
-  //   [],
-  // );
   const [code, setCode] = useState(`function solution() {
   // TODO
 }`);
@@ -33,13 +24,6 @@ function CodeEditor() {
   useEffect(() => {
     connect();
   }, [connect]);
-
-  // useEffect(
-  //   () => () => {
-  //     socket.disconnect();
-  //   },
-  //   [socket],
-  // );
 
   useEffect(() => {
     if (!socket) return;
@@ -63,7 +47,7 @@ function CodeEditor() {
     return () => {
       socket.off(SOCKET_EVENT.ROOM_STATE_SYNC, handleStateSync);
     };
-  }, [roomId, socket]);
+  }, [roomId, setMe, socket]);
 
   const handleChange = (value: string) => {
     setCode(value);
