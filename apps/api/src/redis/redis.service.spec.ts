@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call */
 import { Test, TestingModule } from '@nestjs/testing';
-import { RedisService } from './redis.service';
-import { REDIS_CLIENT } from './redis.module';
+
 import { Battle } from '../../../../packages/types/battle';
+import { REDIS_CLIENT } from './redis.module';
+import { RedisService } from './redis.service';
 
 describe('RedisService', () => {
   let service: RedisService;
@@ -60,14 +62,8 @@ describe('RedisService', () => {
       await service.createBattle(battle);
 
       expect(mockRedis.set).toHaveBeenCalledTimes(2);
-      expect(mockRedis.set).toHaveBeenCalledWith(
-        'battle:battle-123',
-        JSON.stringify(battle)
-      );
-      expect(mockRedis.set).toHaveBeenCalledWith(
-        'battle:room:room-456',
-        'battle-123'
-      );
+      expect(mockRedis.set).toHaveBeenCalledWith('battle:battle-123', JSON.stringify(battle));
+      expect(mockRedis.set).toHaveBeenCalledWith('battle:room:room-456', 'battle-123');
     });
 
     it('Redis 실패 시 에러를 던져야 한다', async () => {
@@ -104,7 +100,7 @@ describe('RedisService', () => {
       expect(mockRedis.get).toHaveBeenCalledWith('battle:battle-123');
       expect(result).toEqual({
         ...battle,
-        startedAt: battle.startedAt.toISOString(),
+        startedAt: battle.startedAt!.toISOString(),
       });
     });
 

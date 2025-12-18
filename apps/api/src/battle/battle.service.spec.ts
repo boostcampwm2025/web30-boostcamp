@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BattleService } from './battle.service';
-import { RedisService } from '../redis/redis.service';
-import { CreateBattleDTO } from '../../../../packages/types/battle';
+
 import { BATTLE_CONFIG } from '../../../../packages/constants/battle';
+import { CreateBattleDTO } from '../../../../packages/types/battle';
+import { RedisService } from '../redis/redis.service';
+import { BattleService } from './battle.service';
 
 describe('BattleService', () => {
   let service: BattleService;
@@ -102,7 +103,7 @@ describe('BattleService', () => {
           battleId: result.battleId,
           roomId: 'room-123',
           status: 'running',
-        })
+        }),
       );
     });
 
