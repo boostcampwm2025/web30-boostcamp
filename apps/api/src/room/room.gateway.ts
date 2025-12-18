@@ -50,9 +50,9 @@ export class RoomGateway implements OnModuleInit {
   @SubscribeMessage(SOCKET_EVENT.JOIN_ROOM)
   async handleJoinRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { roomId: string; requestedRole: UserRole; username: string },
+    @MessageBody() data: { roomId: string; requestedRole: UserRole },
   ) {
-    const { roomId, requestedRole, username } = data;
+    const { roomId, requestedRole } = data;
 
     const room = await this.roomService.getRoom(roomId);
 
@@ -74,6 +74,8 @@ export class RoomGateway implements OnModuleInit {
       return;
     }
 
+    const username = `User-${Date.now().toString().slice(-4)}`;
+
     const newUser: RoomUser = {
       userId: client.id,
       username: username,
@@ -92,8 +94,6 @@ export class RoomGateway implements OnModuleInit {
 
     await client.join(roomId);
 
-    // 방 입장 시 배틀 입장
-
     // 참가자일 경우 배틀에도 참가
     if (requestedRole === 'player') {
       await this.battleService.joinBattle(roomId, newUser);
@@ -102,9 +102,11 @@ export class RoomGateway implements OnModuleInit {
     client.emit(SOCKET_EVENT.ROOM_STATE_SYNC, {
       roomId: room.roomId,
       role: requestedRole,
+      userId: client.id,
       username: username,
     });
 
+    // 같은 방 다른 사람들에게 새 유저 입장 알림
     client.to(roomId).emit(SOCKET_EVENT.ROOM_USER_JOINED, {
       playerCount: room.currentPlayers.length,
     });
