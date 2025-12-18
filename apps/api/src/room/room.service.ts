@@ -57,4 +57,9 @@ export class RoomService {
 
     return { playerCount, isAvailable };
   }
+
+  async saveRoom(room: Room): Promise<void> {
+    const key = RedisKeys.room(room.roomId);
+    await this.redis.set(key, JSON.stringify(room));
+  }
 }
