@@ -1,12 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { Battle } from '@packages/types/battle';
 import Redis from 'ioredis';
 
-import { Battle } from '../../../../packages/types/battle';
-import { REDIS_CLIENT } from './redis.module';
-import { RedisKeys } from './redis-key.constant';
+import { REDIS_CLIENT } from '@/redis/redis.module';
+import { RedisKeys } from '@/redis/redis-key.constant';
 
 @Injectable()
-export class RedisService {
+export class BattleRedisService {
   constructor(
     @Inject(REDIS_CLIENT)
     private readonly redis: Redis,
@@ -35,5 +35,17 @@ export class RedisService {
     }
 
     return JSON.parse(data) as Battle;
+  }
+
+  async getBattleIdByRoomId(roomId: string): Promise<string | null> {
+    const roomKey = RedisKeys.battleByRoom(roomId);
+    const battleId = await this.redis.get(roomKey);
+
+    return battleId;
+  }
+
+  async updateBattle(battle: Battle): Promise<void> {
+    const key = RedisKeys.battle(battle.battleId);
+    await this.redis.set(key, JSON.stringify(battle));
   }
 }

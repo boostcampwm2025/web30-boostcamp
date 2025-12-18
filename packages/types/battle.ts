@@ -54,3 +54,10 @@ export interface UpdateBattleUserDTO {
   };
   isFinished?: boolean;
 }
+
+export interface UpdateUserCodeDTO {
+  roomId: string;
+  userId: string;
+  code: string;
+  language: string;
+}
