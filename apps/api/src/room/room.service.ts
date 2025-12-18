@@ -1,19 +1,34 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { BATTLE_CONFIG } from '@packages/constants/battle';
 import Redis from 'ioredis';
 
 import { ROOM_CONFIG } from '../../../../packages/constants/socket-event';
 import { Room, RoomAvailabilityResponseDTO } from '../../../../packages/types/room';
+import { BattleService } from '../battle/battle.service';
 import { REDIS_CLIENT } from '../redis/redis.module';
 import { RedisKeys } from '../redis/redis-key.constant';
 
 @Injectable()
 export class RoomService {
-  constructor(@Inject(REDIS_CLIENT) private readonly redis: Redis) {}
+  constructor(
+    @Inject(REDIS_CLIENT) private readonly redis: Redis,
+    private readonly BattleService: BattleService,
+  ) {}
 
   async createRoom(roomId: string): Promise<Room> {
     const room = this.createDefaultRoom(roomId);
     const key = RedisKeys.room(room.roomId);
     await this.redis.set(key, JSON.stringify(room));
+
+    // 룸 생성 후 배틀 생성
+    await this.BattleService.createBattle({
+      roomId: room.roomId,
+      config: {
+        duration: BATTLE_CONFIG.DURATION,
+      },
+      users: [],
+    });
+
     return room;
   }
 
