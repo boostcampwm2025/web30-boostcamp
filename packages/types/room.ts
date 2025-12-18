@@ -1,4 +1,4 @@
-import type { RoomUser } from './user';
+import type { RoomUser, UserRole } from './user';
 
 export type RoomStatus = 'waiting' | 'in-battle';
 
@@ -29,21 +29,24 @@ export interface RoomCreateDTO {
 
 // === Socket DTOs ===
 
-// Client -> Server
-export interface RoomAvailabilityRequest {
+// CHECK_ROOM_AVAILABILITY_REQUEST DTO
+export interface RoomAvailabilityRequestDTO {
   roomId: string;
 }
-
-// Server -> Client
-export interface RoomAvailabilityPayload {
+// ROOM_AVAILABILITY_RESPONSE DTO
+export interface RoomAvailabilityResponseDTO {
   roomId: string;
-  currentPlayers: RoomUser[];
-  currentSpectators: RoomUser[];
-  maxPlayers: number;
+  playerCount: number;
+  isAvailable: boolean;
 }
 
-// 방 유저 입장/퇴장 이벤트 페이로드
-export interface RoomUserEventPayload {
+// 방 입장 요청/응답
+export interface JoinRoomRequest {
   roomId: string;
-  user: RoomUser;
+  role: UserRole;
+}
+
+export interface JoinRoomResponse {
+  roomId: string;
+  role: UserRole;
 }

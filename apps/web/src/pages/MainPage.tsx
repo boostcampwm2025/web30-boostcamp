@@ -1,5 +1,7 @@
+import { ROOM_CONFIG } from '@shared/constants/socket-event';
 import type { UserRole } from '@shared/types/user';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { JoinModal } from '../components/JoinModal';
 import { useBattleSocketStore } from '../stores/battleSocketStore';
@@ -7,37 +9,54 @@ import { useBattleSocketStore } from '../stores/battleSocketStore';
 const DEFAULT_ROOM_ID = '1';
 
 function MainPage() {
+  const navigate = useNavigate();
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<UserRole>('player');
-  const {
-    connect,
-    disconnect,
-    bindRoomEvents,
-    requestRoomAvailability,
-    roomState,
-    clearRoomListeners,
-  } = useBattleSocketStore();
+  const [joinError, setJoinError] = useState('');
+  const [isJoining, setIsJoining] = useState(false);
+  const { connect, disconnect, requestRoomAvailability, roomAvailability, joinRoom } =
+    useBattleSocketStore();
 
   const handleCloseModal = () => {
     setModalOpen(false);
-    clearRoomListeners();
-    //disconnect();
+    setJoinError('');
+    setIsJoining(false);
   };
 
   const participants = {
-    count: roomState?.currentPlayers.length ?? 0,
-    limit: roomState?.maxPlayers ?? 2,
+    count: roomAvailability?.playerCount ?? 0,
+    limit: ROOM_CONFIG.MAX_PLAYERS,
   };
   const spectators = {
-    count: roomState?.currentSpectators.length ?? 0,
+    count: 0,
     limit: Infinity,
   };
 
   const handleStartBattle = () => {
+    setJoinError('');
     connect();
-    bindRoomEvents(DEFAULT_ROOM_ID);
-    requestRoomAvailability(DEFAULT_ROOM_ID);
+    requestRoomAvailability({ roomId: DEFAULT_ROOM_ID }).catch((error) => {
+      setJoinError(error instanceof Error ? error.message : '인원 정보를 불러오지 못했습니다.');
+    });
     setModalOpen(true);
+  };
+
+  const handleJoinRoom = async () => {
+    setJoinError('');
+    setIsJoining(true);
+    try {
+      const response = await joinRoom({ roomId: DEFAULT_ROOM_ID, role: selectedRole });
+      const role = response.role ?? selectedRole;
+      const search = role === 'spectator' ? '?mode=spectator' : '';
+      setModalOpen(false);
+      navigate(`/room/${response.roomId}${search}`);
+    } catch (error) {
+      setJoinError(
+        error instanceof Error ? error.message : '입장에 실패했습니다. 잠시 후 다시 시도해주세요.',
+      );
+    } finally {
+      setIsJoining(false);
+    }
   };
 
   useEffect(() => {
@@ -82,6 +101,9 @@ function MainPage() {
         onClose={handleCloseModal}
         selectedRole={selectedRole}
         onSelectRole={setSelectedRole}
+        onJoin={handleJoinRoom}
+        joining={isJoining}
+        error={joinError}
         participants={participants}
         spectators={spectators}
       />

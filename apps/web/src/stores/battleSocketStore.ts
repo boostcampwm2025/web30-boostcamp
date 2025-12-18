@@ -1,34 +1,31 @@
-import { ROOM_CONFIG, SOCKET_EVENT } from '@shared/constants/socket-event';
-import type { RoomAvailabilityPayload, RoomUserEventPayload } from '@shared/types/room';
+import { SOCKET_EVENT } from '@shared/constants/socket-event';
+import type {
+  JoinRoomRequest,
+  JoinRoomResponse,
+  RoomAvailabilityRequestDTO,
+  RoomAvailabilityResponseDTO,
+} from '@shared/types/room';
 import type { Socket } from 'socket.io-client';
 import { create } from 'zustand';
 
 import { connectBattleSocket, disconnectBattleSocket } from '../lib/battleSocket';
 
-type RoomListenerSet = {
-  availability: (payload: RoomAvailabilityPayload) => void;
-  stateSync: (payload: RoomAvailabilityPayload) => void;
-  joined: (payload: RoomUserEventPayload) => void;
-  left: (payload: RoomUserEventPayload) => void;
-};
-
 interface BattleSocketState {
   socket: Socket | null;
   isConnected: boolean;
-  roomState: RoomAvailabilityPayload | null;
-  listeners: RoomListenerSet | null;
+  roomAvailability: RoomAvailabilityResponseDTO | null;
   connect: () => Socket;
   disconnect: () => void;
-  bindRoomEvents: (roomId: string) => void;
-  requestRoomAvailability: (roomId: string) => void;
-  clearRoomListeners: () => void;
+  requestRoomAvailability: (
+    payload: RoomAvailabilityRequestDTO,
+  ) => Promise<RoomAvailabilityResponseDTO>;
+  joinRoom: (payload: JoinRoomRequest) => Promise<JoinRoomResponse>;
 }
 
 export const useBattleSocketStore = create<BattleSocketState>((set, get) => ({
   socket: null,
   isConnected: false,
-  roomState: null,
-  listeners: null,
+  roomAvailability: null,
   // 단일 소켓 인스턴스를 유지하고 기본 연결 상태를 관리합니다.
   connect: () => {
     const existing = get().socket;
@@ -51,93 +48,39 @@ export const useBattleSocketStore = create<BattleSocketState>((set, get) => ({
   },
   // 소켓과 방 상태를 정리합니다.
   disconnect: () => {
-    get().clearRoomListeners();
     disconnectBattleSocket();
-    set({ isConnected: false, socket: null, roomState: null });
+    set({ isConnected: false, socket: null, roomAvailability: null });
   },
-  // 방 관련 리스너가 등록된 경우 제거합니다.
-  clearRoomListeners: () => {
-    const socket = get().socket;
-    const listeners = get().listeners;
-    if (!socket || !listeners) return;
+  // 방 상태를 한번 요청하고 응답으로 저장합니다.
+  requestRoomAvailability: (payload: RoomAvailabilityRequestDTO) =>
+    new Promise((resolve, reject) => {
+      const isAvailabilityResponse = (
+        response: unknown,
+      ): response is RoomAvailabilityResponseDTO => {
+        if (!response || typeof response !== 'object') return false;
+        return 'roomId' in response && 'playerCount' in response && 'isAvailable' in response;
+      };
 
-    socket.off(SOCKET_EVENT.ROOM_AVAILABILITY, listeners.availability);
-    socket.off(SOCKET_EVENT.ROOM_STATE_SYNC, listeners.stateSync);
-    socket.off(SOCKET_EVENT.ROOM_USER_JOINED, listeners.joined);
-    socket.off(SOCKET_EVENT.ROOM_USER_LEFT, listeners.left);
-
-    set({ listeners: null });
-  },
-  // 방의 인원 현황/동기화/입장/퇴장 이벤트를 바인딩합니다.
-  bindRoomEvents: (roomId: string) => {
-    const socket = get().connect();
-
-    // 기존 리스너 제거 후 재등록
-    get().clearRoomListeners();
-
-    const setRoomState = (payload: RoomAvailabilityPayload) => {
-      if (payload.roomId !== roomId) return;
-      set({ roomState: payload });
-    };
-
-    const handleUserJoined = (payload: RoomUserEventPayload) => {
-      if (payload.roomId !== roomId) return;
-      set((state) => {
-        const prev =
-          state.roomState ??
-          ({
-            roomId,
-            currentPlayers: [],
-            currentSpectators: [],
-            maxPlayers: ROOM_CONFIG.MAX_PLAYERS,
-          } as RoomAvailabilityPayload);
-        const targetKey = payload.user.role === 'player' ? 'currentPlayers' : 'currentSpectators';
-        const alreadyIn = prev[targetKey].some((user) => user.userId === payload.user.userId);
-        if (alreadyIn) {
-          return { roomState: prev };
-        }
-        return {
-          roomState: {
-            ...prev,
-            [targetKey]: [...prev[targetKey], payload.user],
-          },
-        };
+      const socket = get().connect();
+      socket.emit(
+        SOCKET_EVENT.CHECK_ROOM_AVAILABILITY,
+        payload,
+        (response: RoomAvailabilityResponseDTO | { error?: string } | null | undefined) => {
+          if (!response || 'error' in response || !isAvailabilityResponse(response)) {
+            reject(new Error(response?.error ?? 'ROOM_AVAILABILITY_FAILED'));
+            return;
+          }
+          set({ roomAvailability: response });
+          resolve(response);
+        },
+      );
+    }),
+  // 방 입장 요청을 보낸다.
+  joinRoom: (payload: JoinRoomRequest) =>
+    new Promise((resolve) => {
+      const socket = get().connect();
+      socket.emit(SOCKET_EVENT.JOIN_ROOM, payload, (response: JoinRoomResponse) => {
+        resolve(response);
       });
-    };
-
-    const handleUserLeft = (payload: RoomUserEventPayload) => {
-      if (payload.roomId !== roomId) return;
-      set((state) => {
-        if (!state.roomState) return state;
-        const targetKey = payload.user.role === 'player' ? 'currentPlayers' : 'currentSpectators';
-        return {
-          roomState: {
-            ...state.roomState,
-            [targetKey]: state.roomState[targetKey].filter(
-              (user) => user.userId !== payload.user.userId,
-            ),
-          },
-        };
-      });
-    };
-
-    socket.on(SOCKET_EVENT.ROOM_AVAILABILITY, setRoomState);
-    socket.on(SOCKET_EVENT.ROOM_STATE_SYNC, setRoomState);
-    socket.on(SOCKET_EVENT.ROOM_USER_JOINED, handleUserJoined);
-    socket.on(SOCKET_EVENT.ROOM_USER_LEFT, handleUserLeft);
-
-    set({
-      listeners: {
-        availability: setRoomState,
-        stateSync: setRoomState,
-        joined: handleUserJoined,
-        left: handleUserLeft,
-      },
-    });
-  },
-  // 방 상태를 한 번 요청합니다.
-  requestRoomAvailability: (roomId: string) => {
-    const socket = get().connect();
-    socket.emit(SOCKET_EVENT.CHECK_ROOM_AVAILABILITY, { roomId });
-  },
+    }),
 }));
