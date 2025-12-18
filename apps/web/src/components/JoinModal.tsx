@@ -48,7 +48,7 @@ function RoleCard({
         className={`flex h-14 w-14 items-center justify-center rounded-2xl ${
           active
             ? 'bg-participant-icon text-white'
-            : 'border-neutral-card bg-white text-spectator-icon border-1 shadow-sm'
+            : 'border-neutral-card bg-white text-spectator-icon border shadow-sm'
         }`}
       >
         <Icon size={24} strokeWidth={2.2} />

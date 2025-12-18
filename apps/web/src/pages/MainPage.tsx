@@ -1,17 +1,50 @@
 import type { UserRole } from '@shared/types/user';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { JoinModal } from '../components/JoinModal';
+import { useBattleSocketStore } from '../stores/battleSocketStore';
+
+const DEFAULT_ROOM_ID = '1';
 
 function MainPage() {
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<UserRole>('player');
-  const [participants] = useState({ count: 0, limit: 2 });
-  const [spectators] = useState({ count: 0, limit: Infinity });
+  const {
+    connect,
+    disconnect,
+    bindRoomEvents,
+    requestRoomAvailability,
+    roomState,
+    clearRoomListeners,
+  } = useBattleSocketStore();
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    clearRoomListeners();
+    //disconnect();
+  };
+
+  const participants = {
+    count: roomState?.currentPlayers.length ?? 0,
+    limit: roomState?.maxPlayers ?? 2,
+  };
+  const spectators = {
+    count: roomState?.currentSpectators.length ?? 0,
+    limit: Infinity,
+  };
 
   const handleStartBattle = () => {
+    connect();
+    bindRoomEvents(DEFAULT_ROOM_ID);
+    requestRoomAvailability(DEFAULT_ROOM_ID);
     setModalOpen(true);
   };
+
+  useEffect(() => {
+    return () => {
+      disconnect();
+    };
+  }, [disconnect]);
 
   return (
     <div className="min-h-screen">
@@ -46,7 +79,7 @@ function MainPage() {
 
       <JoinModal
         open={isModalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={handleCloseModal}
         selectedRole={selectedRole}
         onSelectRole={setSelectedRole}
         participants={participants}
