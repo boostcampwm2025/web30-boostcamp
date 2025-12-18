@@ -8,6 +8,8 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
+import { BattleService } from '@/battle/battle.service';
+
 import {
   SOCKET_ERROR,
   SOCKET_EVENT,
@@ -20,7 +22,10 @@ import { RoomService } from './room.service';
 export class RoomGateway implements OnModuleInit {
   @WebSocketServer() server: Server;
 
-  constructor(private readonly roomService: RoomService) {}
+  constructor(
+    private readonly roomService: RoomService,
+    private readonly battleService: BattleService,
+  ) {}
 
   async onModuleInit() {
     await this.roomService.createRoom('1');
@@ -86,6 +91,13 @@ export class RoomGateway implements OnModuleInit {
     await this.roomService.saveRoom(room);
 
     await client.join(roomId);
+
+    // 방 입장 시 배틀 입장
+
+    // 참가자일 경우 배틀에도 참가
+    if (requestedRole === 'player') {
+      await this.battleService.joinBattle(roomId, newUser);
+    }
 
     client.emit(SOCKET_EVENT.ROOM_STATE_SYNC, {
       roomId: room.roomId,

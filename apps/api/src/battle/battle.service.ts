@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BATTLE_CONFIG } from '@packages/constants/battle';
 import { Battle, BattleUser, CreateBattleDTO, UpdateUserCodeDTO } from '@packages/types/battle';
+import { RoomUser } from '@packages/types/user';
 
 import { BattleRedisService } from '@/battle/battle-redis.service';
 
@@ -37,6 +38,42 @@ export class BattleService {
     };
 
     await this.battleRedisService.createBattle(battle);
+
+    return battle;
+  }
+
+  // 배틀 입장
+  async joinBattle(roomId: string, user: RoomUser): Promise<Battle | null> {
+    const battleId = await this.battleRedisService.getBattleIdByRoomId(roomId);
+    if (!battleId) return null;
+
+    const battle = await this.battleRedisService.getBattle(battleId);
+    if (!battle) return null;
+
+    // TODO: 참가자 or 관전자 구분 로직 추가
+    // 현재는 모두 참가자로 간주
+    const existingUser = battle.users.find((u) => u.userId === user.userId);
+    if (existingUser) {
+      existingUser.isConnected = true;
+      existingUser.disconnectedAt = undefined;
+    } else {
+      const newBattleUser: BattleUser = {
+        userId: user.userId,
+        battleId: battle.battleId,
+        code: '',
+        language: BATTLE_CONFIG.DEFAULT_LANGUAGE,
+        progress: {
+          passedCount: 0,
+          totalCount: 0,
+        },
+        isConnected: true,
+        isFinished: false,
+      };
+
+      battle.users.push(newBattleUser);
+    }
+
+    await this.battleRedisService.updateBattle(battle);
 
     return battle;
   }
