@@ -1,9 +1,9 @@
 import { BATTLE_EVENTS } from '@shared/constants/battle';
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { io, Socket } from 'socket.io-client';
 
 import { useRoomStore } from '@/store/roomStore';
+import { useBattleSocketStore } from '@/stores/battleSocketStore';
 
 function CodeSpectator() {
   const { roomId: roomIdParam } = useParams<{ roomId?: string }>();
@@ -14,8 +14,11 @@ function CodeSpectator() {
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  const client = useBattleSocketStore((state) => state.socket);
+
   useEffect(() => {
-    const client: Socket = io('/', { transports: ['websocket'], autoConnect: true });
+    // const client: Socket = io('/', { transports: ['websocket'], autoConnect: true });
+    if (!client) return;
 
     const handleCodeUpdate = (payload: {
       roomId: string;

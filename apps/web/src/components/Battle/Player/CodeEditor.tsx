@@ -1,11 +1,11 @@
 import { BATTLE_EVENTS } from '@shared/constants/battle';
 import { SOCKET_EVENT } from '@shared/constants/socket-event';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { io } from 'socket.io-client';
 
 import type { Player } from '@/store/roomStore';
 import { useRoomStore } from '@/store/roomStore';
+import { useBattleSocketStore } from '@/stores/battleSocketStore';
 
 function CodeEditor() {
   const { roomId: roomIdParam } = useParams<{ roomId?: string }>();
@@ -14,27 +14,36 @@ function CodeEditor() {
   const me = useRoomStore((state: { me?: Player }) => state.me);
   const setMe = useRoomStore((state: { setMe: (me: Player) => void }) => state.setMe);
 
+  const socket = useBattleSocketStore((state) => state.socket);
+  const connect = useBattleSocketStore((state) => state.connect);
+
   // 소켓은 useMemo로 생성 후 useEffect로 언마운트 시 disconnect
-  const socket = useMemo(
-    () =>
-      io('/', {
-        transports: ['websocket'],
-        autoConnect: true,
-      }),
-    [],
-  );
+  // const socket = useMemo(
+  //   () =>
+  //     io('/', {
+  //       transports: ['websocket'],
+  //       autoConnect: true,
+  //     }),
+  //   [],
+  // );
   const [code, setCode] = useState(`function solution() {
   // TODO
 }`);
 
-  useEffect(
-    () => () => {
-      socket.disconnect();
-    },
-    [socket],
-  );
+  useEffect(() => {
+    connect();
+  }, [connect]);
+
+  // useEffect(
+  //   () => () => {
+  //     socket.disconnect();
+  //   },
+  //   [socket],
+  // );
 
   useEffect(() => {
+    if (!socket) return;
+
     const handleStateSync = (payload: {
       roomId: string;
       role: string;

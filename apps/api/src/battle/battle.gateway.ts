@@ -38,6 +38,13 @@ export class BattleGateway {
         language,
       });
 
+      client.to(dto.roomId).emit(BATTLE_EVENTS.CODE_UPDATED, {
+        roomId,
+        userId,
+        code,
+        language,
+      });
+
       return { success: true };
     } catch (error) {
       console.error('Error handling code change:', error);

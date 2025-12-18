@@ -1,6 +1,6 @@
 import { ROOM_CONFIG } from '@shared/constants/socket-event';
 import type { UserRole } from '@shared/types/user';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { JoinModal } from '../components/JoinModal';
@@ -15,7 +15,6 @@ function MainPage() {
   const [joinError, setJoinError] = useState('');
   const [isJoining, setIsJoining] = useState(false);
   const connect = useBattleSocketStore((state) => state.connect);
-  const disconnect = useBattleSocketStore((state) => state.disconnect);
   const requestRoomAvailability = useBattleSocketStore((state) => state.requestRoomAvailability);
   const roomAvailability = useBattleSocketStore((state) => state.roomAvailability);
   const joinRoom = useBattleSocketStore((state) => state.joinRoom);
@@ -70,11 +69,11 @@ function MainPage() {
     }
   };
 
-  useEffect(() => {
-    return () => {
-      disconnect();
-    };
-  }, [disconnect]);
+  // useEffect(() => {
+  //   return () => {
+  //     disconnect();
+  //   };
+  // }, [disconnect]);
 
   return (
     <div className="min-h-screen">
