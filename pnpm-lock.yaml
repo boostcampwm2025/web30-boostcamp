@@ -71,6 +71,9 @@ importers:
       swagger-ui-express:
         specifier: ^5.0.1
         version: 5.0.1(express@5.1.0)
+      tsconfig-paths:
+        specifier: ^4.2.0
+        version: 4.2.0
       typeorm:
         specifier: ^0.3.28
         version: 0.3.28(ioredis@5.8.2)(mysql2@3.15.3)(ts-node@10.9.2(@types/node@22.19.2)(typescript@5.9.3))
@@ -129,9 +132,6 @@ importers:
       ts-node-dev:
         specifier: ^2.0.0
         version: 2.0.0(@types/node@22.19.2)(typescript@5.9.3)
-      tsconfig-paths:
-        specifier: ^4.2.0
-        version: 4.2.0
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
