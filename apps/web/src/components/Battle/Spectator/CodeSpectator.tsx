@@ -4,8 +4,8 @@ import type { UserRole } from '@shared/types/user';
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 
-import { useRoomStore } from '@/store/roomStore';
 import { useBattleSocketStore } from '@/stores/battleSocketStore';
+import { useRoomStore } from '@/stores/roomStore';
 
 function CodeSpectator() {
   const { roomId: roomIdParam } = useParams<{ roomId?: string }>();

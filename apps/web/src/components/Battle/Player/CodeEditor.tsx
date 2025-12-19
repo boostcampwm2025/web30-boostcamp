@@ -3,9 +3,9 @@ import { SOCKET_EVENT } from '@shared/constants/socket-event';
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 
-import type { Player } from '@/store/roomStore';
-import { useRoomStore } from '@/store/roomStore';
 import { useBattleSocketStore } from '@/stores/battleSocketStore';
+import type { Player } from '@/stores/roomStore';
+import { useRoomStore } from '@/stores/roomStore';
 
 function CodeEditor() {
   const { roomId: roomIdParam } = useParams<{ roomId?: string }>();
