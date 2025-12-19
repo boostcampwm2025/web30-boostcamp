@@ -97,16 +97,26 @@ export class RoomGateway implements OnModuleInit {
       await this.battleService.joinBattle(roomId, newUser);
     }
 
-    client.emit(SOCKET_EVENT.ROOM_STATE_SYNC, {
-      roomId: room.roomId,
-      role: requestedRole,
-      userId: client.id,
-      username: username,
+    // 새로 입장한 유저에게 현재 방의 모든 유저 정보를 전달
+    const participants = [...room.currentPlayers, ...room.currentSpectators];
+    participants.forEach((participant) => {
+      client.emit(SOCKET_EVENT.ROOM_STATE_SYNC, {
+        roomId: room.roomId,
+        role: participant.role,
+        userId: participant.userId,
+        username: participant.username,
+      });
     });
 
     // 같은 방 다른 사람들에게 새 유저 입장 알림
     client.to(roomId).emit(SOCKET_EVENT.ROOM_USER_JOINED, {
       playerCount: room.currentPlayers.length,
+    });
+    client.to(roomId).emit(SOCKET_EVENT.ROOM_STATE_SYNC, {
+      roomId: room.roomId,
+      role: newUser.role,
+      userId: newUser.userId,
+      username: newUser.username,
     });
   }
 }
