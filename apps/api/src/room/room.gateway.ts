@@ -109,4 +109,44 @@ export class RoomGateway implements OnModuleInit {
       playerCount: room.currentPlayers.length,
     });
   }
+
+  @SubscribeMessage(SOCKET_EVENT.LEAVE_ROOM)
+  async handleLeaveRoom(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { roomId: string },
+  ) {
+    const { roomId } = data;
+    const userId = client.id;
+
+    const room = await this.roomService.getRoom(roomId);
+
+    if (!room) {
+      client.emit(SOCKET_EVENT.ERROR, {
+        code: SOCKET_ERROR.ROOM_NOT_FOUND,
+        message: '방을 찾을 수 없습니다.',
+      });
+      return;
+    }
+
+    // 참가자인지 확인
+    const isPlayer = room.currentPlayers.some((player) => player.userId === userId);
+
+    // 참가자일 경우 배틀에서도 제거
+    if (isPlayer) {
+      await this.battleService.leaveBattle(roomId, userId);
+    }
+
+    // 방에서 사용자 제거
+    const updatedRoom = await this.roomService.removeUser(roomId, userId);
+
+    if (updatedRoom) {
+      // 같은 방 다른 사람들에게 유저 퇴장 알림
+      client.to(roomId).emit(SOCKET_EVENT.ROOM_USER_LEFT, {
+        playerCount: updatedRoom.currentPlayers.length,
+      });
+    }
+
+    // 소켓 룸에서 나가기
+    await client.leave(roomId);
+  }
 }

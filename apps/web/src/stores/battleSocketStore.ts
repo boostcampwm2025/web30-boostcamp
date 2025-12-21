@@ -24,6 +24,7 @@ interface BattleSocketState {
     payload: RoomAvailabilityRequestDTO,
   ) => Promise<RoomAvailabilityResponseDTO>;
   joinRoom: (payload: JoinRoomRequest) => Promise<JoinRoomResponse>;
+  leaveRoom: (roomId: string) => void;
   subscribeRoomAvailability: (roomId: string) => void;
   unsubscribeRoomAvailability: () => void;
 }
@@ -119,6 +120,13 @@ export const useBattleSocketStore = create<BattleSocketState>((set, get) => ({
         }
       });
     }),
+  // 방 나가기 요청을 보낸다.
+  leaveRoom: (roomId: string) => {
+    const socket = get().socket;
+    if (!socket) return;
+
+    socket.emit(SOCKET_EVENT.LEAVE_ROOM, { roomId });
+  },
   subscribeRoomAvailability: (roomId: string) => {
     const socket = get().connect();
 
