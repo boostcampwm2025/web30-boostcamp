@@ -75,6 +75,7 @@ export class RoomGateway implements OnModuleInit {
     const username = `User-${Date.now().toString().slice(-4)}`;
 
     const newUser: RoomUser = {
+      roomId: roomId,
       userId: client.id,
       username: username,
       socketId: client.id,
@@ -97,7 +98,14 @@ export class RoomGateway implements OnModuleInit {
       await this.battleService.joinBattle(roomId, newUser);
     }
 
-    client.emit(SOCKET_EVENT.ROOM_STATE_SYNC, {
+    // 방 전체에 최신 참여자 목록 브로드캐스트
+    const players = [...room.currentPlayers];
+    this.server.to(roomId).emit(SOCKET_EVENT.ROOM_PLAYERS, {
+      roomId: room.roomId,
+      players,
+    });
+
+    client.emit(SOCKET_EVENT.ROOM_STATE_ROLE, {
       roomId: room.roomId,
       role: requestedRole,
       userId: client.id,
