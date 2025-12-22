@@ -51,11 +51,16 @@ export interface JoinRoomResponse {
   role: UserRole;
 }
 
-// ROOM_STATE_SYNC payload (server -> client after join)
+// ROOM_STATE_ROLE payload (server -> client after join)
 export interface RoomStateSyncPayload {
   roomId: string;
   role: UserRole;
   userId: string;
   username: string;
   battleId?: string;
+}
+
+export interface RoomPlayerPayload {
+  roomId: string;
+  players: RoomUser[];
 }
