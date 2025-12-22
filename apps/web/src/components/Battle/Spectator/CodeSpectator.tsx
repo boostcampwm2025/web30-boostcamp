@@ -1,6 +1,4 @@
 import { BATTLE_EVENTS } from '@shared/constants/battle';
-import { SOCKET_EVENT } from '@shared/constants/socket-event';
-import type { UserRole } from '@shared/types/user';
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 
@@ -19,20 +17,8 @@ function CodeSpectator() {
 
   useEffect(() => {
     const client = socket ?? connect();
-    const { upsertCode, upsertPlayer, setMe } = useRoomStore.getState();
+    const { upsertCode } = useRoomStore.getState();
 
-    const handleStateSync = (payload: {
-      roomId: string;
-      role: string;
-      userId: string;
-      username: string;
-    }) => {
-      if (payload.roomId !== roomId) return;
-      const player = { ...payload, role: payload.role as UserRole };
-      upsertPlayer(player);
-      setMe(player);
-      if (!selectedId) setSelectedId(payload.userId);
-    };
     const handleCodeUpdate = (payload: {
       roomId: string;
       userId: string;
@@ -45,13 +31,9 @@ function CodeSpectator() {
         setSelectedId(payload.userId);
       }
     };
-    client.on(SOCKET_EVENT.ROOM_STATE_SYNC, handleStateSync);
-    client.on(BATTLE_EVENTS.CODE_CHANGE, handleCodeUpdate);
     client.on(BATTLE_EVENTS.CODE_UPDATED, handleCodeUpdate);
 
     return () => {
-      client.on(SOCKET_EVENT.ROOM_STATE_SYNC, handleStateSync);
-      client.on(BATTLE_EVENTS.CODE_CHANGE, handleCodeUpdate);
       client.off(BATTLE_EVENTS.CODE_UPDATED, handleCodeUpdate);
     };
   }, [connect, roomId, selectedId, socket]);
@@ -81,7 +63,7 @@ function CodeSpectator() {
                   {player.userId[0]}
                 </span>
                 <div className="space-y-1">
-                  <p className="text-base font-semibold text-white">{player.userId}</p>
+                  <p className="text-base font-semibold text-white">{player.username}</p>
                   {/* <p className="text-xs font-semibold text-amber-300">🏅 {player.tier}</p> */}
                   <p className="text-[11px] text-slate-400">
                     {/* {player.progress.passedCount}/{player.progress.totalCount} 통과 */}

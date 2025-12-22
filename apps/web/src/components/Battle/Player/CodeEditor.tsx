@@ -43,9 +43,9 @@ function CodeEditor() {
       });
     };
 
-    socket.on(SOCKET_EVENT.ROOM_STATE_SYNC, handleStateSync);
+    socket.on(SOCKET_EVENT.ROOM_STATE_ROLE, handleStateSync);
     return () => {
-      socket.off(SOCKET_EVENT.ROOM_STATE_SYNC, handleStateSync);
+      socket.off(SOCKET_EVENT.ROOM_STATE_ROLE, handleStateSync);
     };
   }, [roomId, setMe, socket]);
 
