@@ -4,12 +4,14 @@ import type {
   JoinRoomResponse,
   RoomAvailabilityRequestDTO,
   RoomAvailabilityResponseDTO,
+  RoomPlayerPayload,
   RoomStateSyncPayload,
 } from '@shared/types/room';
 import type { Socket } from 'socket.io-client';
 import { create } from 'zustand';
 
 import { connectBattleSocket, disconnectBattleSocket } from '../lib/battleSocket';
+import { useRoomStore } from './roomStore';
 
 interface BattleSocketState {
   socket: Socket | null;
@@ -93,8 +95,22 @@ export const useBattleSocketStore = create<BattleSocketState>((set, get) => ({
       let settled = false;
       const cleanup = () => {
         settled = true;
-        socket.off(SOCKET_EVENT.ROOM_STATE_SYNC, handleSync);
+        socket.off(SOCKET_EVENT.ROOM_STATE_ROLE, handleSync);
+        socket.off(SOCKET_EVENT.ROOM_PLAYERS, handlePlayers);
         socket.off(SOCKET_EVENT.ERROR, handleError);
+      };
+
+      const handlePlayers = (payload: RoomPlayerPayload) => {
+        if (payload.roomId !== payload.roomId) return;
+        const { setPlayers } = useRoomStore.getState();
+        setPlayers(
+          payload.players.map((p) => ({
+            roomId: p.roomId,
+            role: p.role,
+            userId: p.userId,
+            username: p.username,
+          })),
+        );
       };
 
       const handleSync = (response: RoomStateSyncPayload) => {
@@ -109,7 +125,8 @@ export const useBattleSocketStore = create<BattleSocketState>((set, get) => ({
         reject(new Error(error?.message ?? 'JOIN_ROOM_FAILED'));
       };
 
-      socket.on(SOCKET_EVENT.ROOM_STATE_SYNC, handleSync);
+      socket.on(SOCKET_EVENT.ROOM_STATE_ROLE, handleSync);
+      socket.on(SOCKET_EVENT.ROOM_PLAYERS, handlePlayers);
       socket.on(SOCKET_EVENT.ERROR, handleError);
 
       socket.emit(SOCKET_EVENT.JOIN_ROOM, payload, (response: JoinRoomResponse | undefined) => {
